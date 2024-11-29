@@ -1,0 +1,428 @@
+basePath: /api
+definitions:
+  request.CreateTagsRequest:
+    properties:
+      background_color:
+        maxLength: 7
+        minLength: 7
+        type: string
+      name:
+        maxLength: 255
+        minLength: 1
+        type: string
+      text_color:
+        maxLength: 7
+        minLength: 7
+        type: string
+    required:
+    - background_color
+    - name
+    - text_color
+    type: object
+  request.CreateTasksRequest:
+    properties:
+      actual_date_time:
+        maxLength: 30
+        minLength: 8
+        type: string
+      description:
+        maxLength: 500
+        minLength: 1
+        type: string
+      is_done:
+        type: boolean
+      planned_date_time:
+        maxLength: 30
+        minLength: 8
+        type: string
+      time_diff:
+        maxLength: 50
+        minLength: 1
+        type: string
+      title:
+        maxLength: 100
+        minLength: 1
+        type: string
+    required:
+    - planned_date_time
+    - title
+    type: object
+  response.Response:
+    properties:
+      code:
+        type: integer
+      data: {}
+      status:
+        type: string
+    type: object
+  response.TagsResponse:
+    properties:
+      background_color:
+        type: string
+      id:
+        type: integer
+      name:
+        type: string
+      tasks:
+        items:
+          $ref: '#/definitions/response.TasksResponse'
+        type: array
+      text_color:
+        type: string
+    type: object
+  response.TasksResponse:
+    properties:
+      actual_date_time:
+        type: string
+      description:
+        type: string
+      id:
+        type: integer
+      is_done:
+        type: boolean
+      planned_date_time:
+        type: string
+      tags:
+        items:
+          $ref: '#/definitions/response.TagsResponse'
+        type: array
+      time_diff:
+        type: string
+      title:
+        type: string
+    type: object
+host: localhost:8888
+info:
+  contact: {}
+  description: A TaskMaster service API in Go using Gin framework
+  title: TaskMaster Service API
+  version: "1.0"
+paths:
+  /tags:
+    get:
+      description: Return list of tags.
+      responses:
+        "200":
+          description: Success
+          schema:
+            allOf:
+            - $ref: '#/definitions/response.Response'
+            - properties:
+                data:
+                  items:
+                    $ref: '#/definitions/response.TagsResponse'
+                  type: array
+              type: object
+      summary: Get All tags.
+      tags:
+      - tags
+    post:
+      description: Save tags data in Db.
+      parameters:
+      - description: Create tags
+        in: body
+        name: tags
+        required: true
+        schema:
+          $ref: '#/definitions/request.CreateTagsRequest'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/response.Response'
+      summary: Create tags
+      tags:
+      - tags
+  /tags/{tagID}:
+    delete:
+      description: Remove tags data by id.
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/response.Response'
+      summary: Delete tags
+      tags:
+      - tags
+  /tags/{tagId}:
+    get:
+      description: Return the tahs whoes tagId valu mathes id.
+      parameters:
+      - description: update tags by id
+        in: path
+        name: tagId
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/response.Response'
+      summary: Get Single tags by id.
+      tags:
+      - tags
+    patch:
+      description: Update tags data.
+      parameters:
+      - description: update tags by id
+        in: path
+        name: tagId
+        required: true
+        type: string
+      - description: Update tags
+        in: body
+        name: tags
+        required: true
+        schema:
+          $ref: '#/definitions/request.CreateTagsRequest'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/response.Response'
+      summary: Update tags
+      tags:
+      - tags
+  /tags/{tagId}/tasks:
+    delete:
+      consumes:
+      - application/json
+      description: Remove tasks from a tag by providing a tag ID and a list of task
+        IDs.
+      parameters:
+      - description: Tag ID
+        in: path
+        name: tagId
+        required: true
+        type: integer
+      - description: Array of Task IDs
+        in: body
+        name: body
+        required: true
+        schema:
+          items:
+            type: integer
+          type: array
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/response.Response'
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/response.Response'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/response.Response'
+      summary: Detach Tasks from Tag
+      tags:
+      - tags
+    post:
+      consumes:
+      - application/json
+      description: Add tasks to a tag by providing a tag ID and a list of task IDs.
+      parameters:
+      - description: Tag ID
+        in: path
+        name: tagId
+        required: true
+        type: integer
+      - description: Array of Task IDs
+        in: body
+        name: body
+        required: true
+        schema:
+          items:
+            type: integer
+          type: array
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/response.Response'
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/response.Response'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/response.Response'
+      summary: Associate Tasks with Tag
+      tags:
+      - tags
+  /tasks:
+    get:
+      description: Return list of tasks.
+      responses:
+        "200":
+          description: OK
+          schema:
+            type: obejct
+      summary: Get All tasks.
+      tags:
+      - tasks
+    post:
+      description: Save tasks data in Db.
+      parameters:
+      - description: Create tasks
+        in: body
+        name: tasks
+        required: true
+        schema:
+          $ref: '#/definitions/request.CreateTasksRequest'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/response.Response'
+      summary: Create tasks
+      tags:
+      - tasks
+  /tasks/{taskID}:
+    delete:
+      description: Remove tasks data by id.
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/response.Response'
+      summary: Delete tasks
+      tags:
+      - tasks
+  /tasks/{taskId}:
+    get:
+      description: Return the tahs whoes taskId valu mathes id.
+      parameters:
+      - description: update tasks by id
+        in: path
+        name: taskId
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/response.Response'
+      summary: Get Single tasks by id.
+      tags:
+      - tasks
+    patch:
+      description: Update tasks data.
+      parameters:
+      - description: update tasks by id
+        in: path
+        name: taskId
+        required: true
+        type: string
+      - description: Update tasks
+        in: body
+        name: tasks
+        required: true
+        schema:
+          $ref: '#/definitions/request.CreateTasksRequest'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/response.Response'
+      summary: Update tasks
+      tags:
+      - tasks
+  /tasks/{taskId}/tags:
+    delete:
+      consumes:
+      - application/json
+      description: Remove tags from a task by providing a task ID and a list of tag
+        IDs.
+      parameters:
+      - description: Task ID
+        in: path
+        name: taskId
+        required: true
+        type: integer
+      - description: Array of Tag IDs
+        in: body
+        name: body
+        required: true
+        schema:
+          items:
+            type: integer
+          type: array
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/response.Response'
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/response.Response'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/response.Response'
+      summary: Detach Tags from Task
+      tags:
+      - tasks
+    post:
+      consumes:
+      - application/json
+      description: Add tags to a task by providing a task ID and a list of tag IDs.
+      parameters:
+      - description: Task ID
+        in: path
+        name: taskId
+        required: true
+        type: integer
+      - description: Array of Tag IDs
+        in: body
+        name: body
+        required: true
+        schema:
+          items:
+            type: integer
+          type: array
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/response.Response'
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/response.Response'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/response.Response'
+      summary: Associate Tags with Task
+      tags:
+      - tasks
+swagger: "2.0"
